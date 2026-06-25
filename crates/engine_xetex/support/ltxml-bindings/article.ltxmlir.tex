@@ -1,0 +1,61 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Partial oxidation of LaTeXML's article.cls.ltxml binding.
+% Targets: ltx:title, ltx:creator, ltx:personname, ltx:section,
+% ltx:subsection, ltx:paragraph.
+
+\catcode`\@=11
+
+\let\ltxmlir@article@orig@title\title
+\def\title#1{\gdef\ltxmlir@title{#1}\ltxmlir@article@orig@title{#1}}
+\let\ltxmlir@title\@empty
+
+\let\ltxmlir@article@orig@author\author
+\def\author#1{\gdef\ltxmlir@author{#1}\ltxmlir@article@orig@author{#1}}
+\let\ltxmlir@author\@empty
+
+\let\ltxmlir@article@orig@maketitle\maketitle
+\def\maketitle{%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{\ltxmlir@title}%
+  \ltxmlir@end{ltx:title}%
+  \ifx\ltxmlir@author\@empty\else
+    \ltxmlir@begin@class{ltx:creator}{ltx_role_author}%
+    \ltxmlir@begin{ltx:personname}%
+    \ltxmlir@text{\ltxmlir@author}%
+    \ltxmlir@end{ltx:personname}%
+    \ltxmlir@end{ltx:creator}%
+  \fi
+  \ltxmlir@article@orig@maketitle
+}
+
+\let\ltxmlir@article@orig@section\section
+\def\section#1{%
+  \ltxmlir@begin{ltx:section}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@article@orig@section{#1}%
+}
+
+\let\ltxmlir@article@orig@subsection\subsection
+\def\subsection#1{%
+  \ltxmlir@begin{ltx:subsection}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@article@orig@subsection{#1}%
+}
+
+\let\ltxmlir@article@orig@paragraph\paragraph
+\def\paragraph#1{%
+  \ltxmlir@begin{ltx:paragraph}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@article@orig@paragraph{#1}%
+}
+
+\catcode`\@=12
+\endinput

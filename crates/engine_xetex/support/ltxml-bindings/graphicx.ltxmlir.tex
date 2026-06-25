@@ -1,0 +1,13 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Partial oxidation of LaTeXML's graphicx.sty.ltxml binding.
+% Targets: ltx:graphics.
+
+\catcode`\@=11
+
+\let\ltxmlir@graphicx@orig@includegraphics\includegraphics
+\def\includegraphics#1{\ltxmlir@graphics{#1}\ltxmlir@graphicx@orig@includegraphics{#1}}
+
+\catcode`\@=12
+\endinput

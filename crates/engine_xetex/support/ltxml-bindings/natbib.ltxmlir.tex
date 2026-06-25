@@ -1,0 +1,13 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Partial oxidation of LaTeXML's natbib.sty.ltxml binding.
+% Targets: ltx:cite, ltx:bibref.
+
+\catcode`\@=11
+
+\let\ltxmlir@natbib@orig@cite\cite
+\def\cite#1{\ltxmlir@begin{ltx:cite}\special{tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"#1"}}}\special{tsem:{"event":"end","element":"ltx:bibref"}}\ltxmlir@end{ltx:cite}\ltxmlir@natbib@orig@cite{#1}}
+
+\catcode`\@=12
+\endinput

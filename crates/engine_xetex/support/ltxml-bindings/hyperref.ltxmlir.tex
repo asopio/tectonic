@@ -1,0 +1,13 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Partial oxidation of LaTeXML's hyperref.sty.ltxml binding.
+% Targets: ltx:ref.
+
+\catcode`\@=11
+
+\let\ltxmlir@hyperref@orig@ref\ref
+\def\ref#1{\special{tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"#1"}}}\special{tsem:{"event":"end","element":"ltx:ref"}}\ltxmlir@hyperref@orig@ref{#1}}
+
+\catcode`\@=12
+\endinput

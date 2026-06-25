@@ -1,0 +1,17 @@
+# Copyright 2025 the Tectonic Project
+# Licensed under the MIT License.
+
+lints.workspace = true
+
+[package]
+name = "tectonic_ltxml_bindings"
+version = "0.0.0-dev.0"
+authors = ["Peter Williams <peter@newton.cx>"]
+description = "Registry of oxidized LaTeXML-compatible package bindings for Tectonic."
+homepage = "https://tectonic-typesetting.github.io/"
+documentation = "https://docs.rs/tectonic_ltxml_bindings"
+repository = "https://github.com/tectonic-typesetting/tectonic/"
+license = "MIT"
+edition = "2021"
+
+[package.metadata.internal_dep_versions]

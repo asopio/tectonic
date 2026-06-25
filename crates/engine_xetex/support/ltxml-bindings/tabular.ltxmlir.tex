@@ -1,0 +1,15 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Fallback oxidation for tabular-related bindings: array, booktabs, longtable.
+% Targets: ltx:tabular.
+
+\catcode`\@=11
+
+\let\ltxmlir@tabular@orig@tabular\tabular
+\let\ltxmlir@tabular@orig@endtabular\endtabular
+\def\tabular#1{\ltxmlir@begin{ltx:tabular}\ltxmlir@tabular@orig@tabular{#1}}
+\def\endtabular{\ltxmlir@end{ltx:tabular}\ltxmlir@tabular@orig@endtabular}
+
+\catcode`\@=12
+\endinput
