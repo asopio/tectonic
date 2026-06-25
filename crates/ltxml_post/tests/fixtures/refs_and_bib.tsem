@@ -1,0 +1,26 @@
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S1","labels":"LABEL:sec:intro","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Introduction"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"See section "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"sec:intro"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":" and "}
+tsem:{"event":"begin","element":"ltx:cite"}
+tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"knuth84"}}
+tsem:{"event":"end","element":"ltx:bibref"}
+tsem:{"event":"end","element":"ltx:cite"}
+tsem:{"event":"text","text":"."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"end","element":"ltx:section"}
+tsem:{"event":"begin","element":"ltx:bibliography","attrs":{"xml:id":"Bib"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"References"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:biblist"}
+tsem:{"event":"begin","element":"ltx:bibitem","attrs":{"xml:id":"bib.knuth84","key":"knuth84","refnum":"1"}}
+tsem:{"event":"text","text":"Donald Knuth. The TeXbook. 1984."}
+tsem:{"event":"end","element":"ltx:bibitem"}
+tsem:{"event":"end","element":"ltx:biblist"}
+tsem:{"event":"end","element":"ltx:bibliography"}

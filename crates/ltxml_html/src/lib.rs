@@ -113,7 +113,10 @@ fn render_node(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
         "ltx:emph" => render_container(node, out, "em", "ltx_emph", context),
         "ltx:ref" => render_ref(node, out, context),
         "ltx:cite" => render_container(node, out, "span", "ltx_cite", context),
-        "ltx:bibref" => render_container(node, out, "span", "ltx_bibref", context),
+        "ltx:bibref" => render_bibref(node, out, context),
+        "ltx:bibliography" => render_container(node, out, "section", "ltx_bibliography", context),
+        "ltx:biblist" => render_container(node, out, "ol", "ltx_biblist", context),
+        "ltx:bibitem" => render_container(node, out, "li", "ltx_bibitem", context),
         "ltx:equation" => render_container(node, out, "div", "ltx_equation", context),
         "ltx:Math" => render_math(node, out, context),
         "ltx:figure" => render_container(node, out, "figure", "ltx_figure", context),
@@ -214,6 +217,21 @@ fn render_ref(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     out.push('>');
     render_children(node, out, context);
     out.push_str("</a>");
+}
+
+fn render_bibref(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
+    if let Some(href) = node.attr("href") {
+        out.push_str("<a");
+        write_common_attrs(node, out, "ltx_bibref");
+        out.push_str(" href=\"");
+        escape_attr(href, out);
+        out.push('"');
+        out.push('>');
+        render_children(node, out, context);
+        out.push_str("</a>");
+    } else {
+        render_container(node, out, "span", "ltx_bibref", context);
+    }
 }
 
 fn render_math(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
