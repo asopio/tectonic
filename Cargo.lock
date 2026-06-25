@@ -3551,6 +3551,14 @@ dependencies = [
  "tectonic_engine_spx2ltxml",
  "tectonic_ltxml_html",
  "tectonic_ltxml_ir",
+ "tectonic_ltxml_profiles",
+]
+
+[[package]]
+name = "tectonic_ltxml_profiles"
+version = "0.0.0-dev.0"
+dependencies = [
+ "tectonic_ltxml_html",
 ]
 
 [[package]]

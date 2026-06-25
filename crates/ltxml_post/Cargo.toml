@@ -20,8 +20,10 @@ tectonic_ltxml_ir = { path = "../ltxml_ir", version = "0.0.0-dev.0" }
 [dev-dependencies]
 tectonic_engine_spx2ltxml = { path = "../engine_spx2ltxml", version = "0.0.0-dev.0" }
 tectonic_ltxml_html = { path = "../ltxml_html", version = "0.0.0-dev.0" }
+tectonic_ltxml_profiles = { path = "../ltxml_profiles", version = "0.0.0-dev.0" }
 
 [package.metadata.internal_dep_versions]
 tectonic_ltxml_ir = "thiscommit:2025-01-01:init"
 tectonic_engine_spx2ltxml = "thiscommit:2025-01-01:init"
 tectonic_ltxml_html = "thiscommit:2025-01-01:init"
+tectonic_ltxml_profiles = "thiscommit:2025-01-01:init"

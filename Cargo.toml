@@ -58,6 +58,7 @@ members = [
     "crates/ltxml_html",
     "crates/ltxml_ir",
     "crates/ltxml_post",
+    "crates/ltxml_profiles",
     "crates/mac_core",
     "crates/pdf_io",
     "crates/status_base",
