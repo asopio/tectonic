@@ -1,0 +1,23 @@
+# Copyright 2025 the Tectonic Project
+# Licensed under the MIT License.
+
+lints.workspace = true
+
+[package]
+name = "tectonic_engine_spx2ltxml"
+version = "0.0.0-dev.0"
+authors = ["Peter Williams <peter@newton.cx>"]
+description = "The Tectonic engine that extracts LaTeXML-shaped IR from SPX semantic specials."
+homepage = "https://tectonic-typesetting.github.io/"
+documentation = "https://docs.rs/tectonic_engine_spx2ltxml"
+repository = "https://github.com/tectonic-typesetting/tectonic/"
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+tectonic_ltxml_ir = { path = "../ltxml_ir", version = "0.0.0-dev.0" }
+tectonic_xdv = { path = "../xdv", version = "0.0.0-dev.0" }
+
+[package.metadata.internal_dep_versions]
+tectonic_ltxml_ir = "thiscommit:2025-01-01:init"
+tectonic_xdv = "c91f2ef37858d1a0a724a5c3ddc2f7ea46373c77"

@@ -184,13 +184,14 @@ This approach lets Tectonic use LaTeXML as an oracle: the same test document can
 Extend or complement `tdux:` specials with a more structured event protocol, tentatively `tsem:`:
 
 ```tex
-\special{tsem:begin section level=1 id=S1 refnum=1 title={Introduction}}
-\special{tsem:end section}
-\special{tsem:begin p}
-\special{tsem:text ...}
-\special{tsem:math mode=inline tex={...} canvas=current}
-\special{tsem:label key=sec:intro id=S1}
-\special{tsem:ref key=sec:intro}
+\special{tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S1","refnum":"1"}}}
+\special{tsem:{"event":"begin","element":"ltx:title"}}
+Introduction
+\special{tsem:{"event":"end","element":"ltx:title"}}
+\special{tsem:{"event":"begin","element":"ltx:p"}}
+\special{tsem:{"event":"math","element":"ltx:Math","attrs":{"mode":"inline","tex":"x^2"}}}
+\special{tsem:{"event":"end","element":"ltx:p"}}
+\special{tsem:{"event":"end","element":"ltx:section"}}
 ```
 
 The existing `tdux:` specials are low-level HTML controls. `tsem:` should be high-level semantic controls.

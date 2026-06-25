@@ -3457,6 +3457,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tectonic_engine_spx2ltxml"
+version = "0.0.0-dev.0"
+dependencies = [
+ "tectonic_ltxml_ir",
+ "tectonic_xdv",
+]
+
+[[package]]
 name = "tectonic_engine_xdvipdfmx"
 version = "0.0.0-dev.0"
 dependencies = [
@@ -3514,6 +3522,14 @@ dependencies = [
  "tectonic_errors",
  "tectonic_status_base",
  "thiserror",
+]
+
+[[package]]
+name = "tectonic_ltxml_ir"
+version = "0.0.0-dev.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
