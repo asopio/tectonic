@@ -4,7 +4,7 @@
 //! HTML rendering tests for the Phase 3 LaTeXML-shaped IR subset.
 
 use tectonic_engine_spx2ltxml::SpxToLtxmlEngine;
-use tectonic_ltxml_html::{render_document, render_document_with_options, RenderOptions};
+use tectonic_ltxml_html::{render_document, render_document_with_options, MathRenderMode, RenderOptions};
 use tectonic_ltxml_ir::LtxmlNode;
 
 fn build_fixture() -> LtxmlNode {
@@ -61,12 +61,30 @@ fn renders_graphics_and_tables() {
 }
 
 #[test]
+fn renders_mathjax_compatible_math_when_configured() {
+    let doc = build_fixture();
+    let html = render_document_with_options(
+        &doc,
+        &RenderOptions {
+            math_render_mode: MathRenderMode::MathJax,
+            include_mathjax_script: true,
+            ..RenderOptions::default()
+        },
+    );
+
+    assert!(html.contains("tex-mml-chtml.js"));
+    assert!(html.contains("<script type=\"math/tex\" class=\"ltx_Math ltx_Math_mathjax\" data-tex=\"x^2\">x^2</script>"));
+    assert!(html.contains("<script type=\"math/tex; mode=display\" class=\"ltx_Math ltx_Math_mathjax\" data-tex=\"E=mc^2\">E=mc^2</script>"));
+}
+
+#[test]
 fn supports_explicit_document_title_option() {
     let doc = build_fixture();
     let html = render_document_with_options(
         &doc,
         &RenderOptions {
             document_title: Some("Custom".to_owned()),
+            ..RenderOptions::default()
         },
     );
 

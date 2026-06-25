@@ -8,18 +8,35 @@
 //! names to HTML while preserving useful `ltx_*` CSS classes, IDs, labels, math
 //! TeX source, and raster graphics metadata.
 
-use tectonic_ltxml_ir::{LtxmlChild, LtxmlNode};
+use tectonic_ltxml_ir::{LtxmlChild, LtxmlNode, MathMetadata, MathMode};
+
+/// Math rendering strategy.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MathRenderMode {
+    /// Render visible TeX text in `span`/`div` elements.
+    Text,
+    /// Render MathJax-compatible TeX script tags.
+    MathJax,
+}
 
 /// Options controlling LaTeXML-shaped IR HTML rendering.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RenderOptions {
     /// Optional document title to use in the HTML `<title>` element.
     pub document_title: Option<String>,
+    /// Math rendering strategy.
+    pub math_render_mode: MathRenderMode,
+    /// Whether to emit a MathJax loader script when using [`MathRenderMode::MathJax`].
+    pub include_mathjax_script: bool,
 }
 
 impl Default for RenderOptions {
     fn default() -> Self {
-        Self { document_title: None }
+        Self {
+            document_title: None,
+            math_render_mode: MathRenderMode::Text,
+            include_mathjax_script: false,
+        }
     }
 }
 
@@ -39,8 +56,12 @@ pub fn render_document_with_options(root: &LtxmlNode, options: &RenderOptions) -
 
     out.push_str("<!doctype html><html><head><meta charset=\"utf-8\"><title>");
     escape_text(title, &mut out);
-    out.push_str("</title></head><body>");
-    render_node(root, &mut out, RenderContext::default());
+    out.push_str("</title>");
+    if options.math_render_mode == MathRenderMode::MathJax && options.include_mathjax_script {
+        out.push_str("<script src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\" async></script>");
+    }
+    out.push_str("</head><body>");
+    render_node(root, &mut out, RenderContext::new(options));
     out.push_str("</body></html>");
     out
 }
@@ -48,16 +69,34 @@ pub fn render_document_with_options(root: &LtxmlNode, options: &RenderOptions) -
 /// Render a LaTeXML-shaped IR node as an HTML fragment.
 pub fn render_fragment(node: &LtxmlNode) -> String {
     let mut out = String::new();
-    render_node(node, &mut out, RenderContext::default());
+    let options = RenderOptions::default();
+    render_node(node, &mut out, RenderContext::new(&options));
     out
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-struct RenderContext {
+#[derive(Clone, Copy, Debug)]
+struct RenderContext<'a> {
     section_level: usize,
+    options: &'a RenderOptions,
 }
 
-fn render_node(node: &LtxmlNode, out: &mut String, context: RenderContext) {
+impl<'a> RenderContext<'a> {
+    fn new(options: &'a RenderOptions) -> Self {
+        Self {
+            section_level: 0,
+            options,
+        }
+    }
+
+    fn with_section_level(self, section_level: usize) -> Self {
+        Self {
+            section_level,
+            options: self.options,
+        }
+    }
+}
+
+fn render_node(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     match node.name.as_str() {
         "ltx:document" => render_container(node, out, "main", "ltx_document", context),
         "ltx:title" => render_title(node, out, context),
@@ -76,7 +115,7 @@ fn render_node(node: &LtxmlNode, out: &mut String, context: RenderContext) {
         "ltx:cite" => render_container(node, out, "span", "ltx_cite", context),
         "ltx:bibref" => render_container(node, out, "span", "ltx_bibref", context),
         "ltx:equation" => render_container(node, out, "div", "ltx_equation", context),
-        "ltx:Math" => render_math(node, out),
+        "ltx:Math" => render_math(node, out, context),
         "ltx:figure" => render_container(node, out, "figure", "ltx_figure", context),
         "ltx:table" => render_container(node, out, "figure", "ltx_table", context),
         "ltx:caption" => render_container(node, out, "figcaption", "ltx_caption", context),
@@ -94,7 +133,7 @@ fn render_node(node: &LtxmlNode, out: &mut String, context: RenderContext) {
     }
 }
 
-fn render_children(node: &LtxmlNode, out: &mut String, context: RenderContext) {
+fn render_children(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     for child in &node.children {
         match child {
             LtxmlChild::Element { node } => render_node(node, out, context),
@@ -108,14 +147,14 @@ fn render_container(
     out: &mut String,
     tag: &str,
     base_class: &str,
-    context: RenderContext,
+    context: RenderContext<'_>,
 ) {
     start_tag(node, out, tag, base_class);
     render_children(node, out, context);
     end_tag(out, tag);
 }
 
-fn render_section(node: &LtxmlNode, out: &mut String, context: RenderContext, level: usize) {
+fn render_section(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>, level: usize) {
     start_tag(node, out, "section", section_class(level));
 
     let heading_level = (level + 1).min(6);
@@ -123,13 +162,13 @@ fn render_section(node: &LtxmlNode, out: &mut String, context: RenderContext, le
         out.push('<');
         out.push_str(heading_tag(heading_level));
         out.push_str(" class=\"ltx_title\">");
-        render_children(title, out, RenderContext { section_level: level });
+        render_children(title, out, context.with_section_level(level));
         out.push_str("</");
         out.push_str(heading_tag(heading_level));
         out.push('>');
     }
 
-    let child_context = RenderContext { section_level: level };
+    let child_context = context.with_section_level(level);
     for child in &node.children {
         match child {
             LtxmlChild::Element { node } if node.name.as_str() == "ltx:title" => {}
@@ -140,10 +179,9 @@ fn render_section(node: &LtxmlNode, out: &mut String, context: RenderContext, le
 
     end_tag(out, "section");
 
-    let _ = context;
 }
 
-fn render_title(node: &LtxmlNode, out: &mut String, context: RenderContext) {
+fn render_title(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     let level = if context.section_level == 0 { 1 } else { (context.section_level + 1).min(6) };
     out.push('<');
     out.push_str(heading_tag(level));
@@ -155,7 +193,7 @@ fn render_title(node: &LtxmlNode, out: &mut String, context: RenderContext) {
     out.push('>');
 }
 
-fn render_ref(node: &LtxmlNode, out: &mut String, context: RenderContext) {
+fn render_ref(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     out.push_str("<a");
     write_common_attrs(node, out, "ltx_ref");
 
@@ -178,10 +216,33 @@ fn render_ref(node: &LtxmlNode, out: &mut String, context: RenderContext) {
     out.push_str("</a>");
 }
 
-fn render_math(node: &LtxmlNode, out: &mut String) {
-    let mode = node.attr("mode").unwrap_or("inline");
-    let tag = if mode == "display" { "div" } else { "span" };
-    let class = if mode == "display" {
+fn render_math(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
+    let metadata = node.math_metadata().unwrap_or(MathMetadata {
+        mode: MathMode::Inline,
+        tex: node.attr("tex"),
+        content_tex: node.attr("content-tex"),
+        text: node.attr("text"),
+        image_src: node.attr("imagesrc"),
+        image_width: node.attr("imagewidth"),
+        image_height: node.attr("imageheight"),
+        image_depth: node.attr("imagedepth"),
+        description: node.attr("description"),
+    });
+
+    match context.options.math_render_mode {
+        MathRenderMode::Text => render_math_text(node, &metadata, out, context),
+        MathRenderMode::MathJax => render_mathjax(node, &metadata, out),
+    }
+}
+
+fn render_math_text(
+    node: &LtxmlNode,
+    metadata: &MathMetadata<'_>,
+    out: &mut String,
+    context: RenderContext<'_>,
+) {
+    let tag = if metadata.mode == MathMode::Display { "div" } else { "span" };
+    let class = if metadata.mode == MathMode::Display {
         "ltx_Math ltx_Math_display"
     } else {
         "ltx_Math ltx_Math_inline"
@@ -189,25 +250,41 @@ fn render_math(node: &LtxmlNode, out: &mut String) {
 
     out.push('<');
     out.push_str(tag);
-    write_common_attrs(node, out, class);
-
-    if let Some(tex) = node.attr("tex") {
-        out.push_str(" data-tex=\"");
-        escape_attr(tex, out);
-        out.push('"');
-    }
-
+    write_math_attrs(node, metadata, out, class);
     out.push('>');
+
     if node.children.is_empty() {
-        if let Some(tex) = node.attr("tex") {
-            escape_text(tex, out);
-        }
+        escape_text(math_text(metadata), out);
     } else {
-        render_children(node, out, RenderContext::default());
+        render_children(node, out, context);
     }
+
     out.push_str("</");
     out.push_str(tag);
     out.push('>');
+}
+
+fn render_mathjax(node: &LtxmlNode, metadata: &MathMetadata<'_>, out: &mut String) {
+    out.push_str("<script type=\"");
+    out.push_str(if metadata.mode == MathMode::Display {
+        "math/tex; mode=display"
+    } else {
+        "math/tex"
+    });
+    out.push('"');
+    write_math_attrs(node, metadata, out, "ltx_Math ltx_Math_mathjax");
+    out.push('>');
+    escape_script_text(math_text(metadata), out);
+    out.push_str("</script>");
+}
+
+fn math_text<'a>(metadata: &MathMetadata<'a>) -> &'a str {
+    metadata
+        .tex
+        .or(metadata.content_tex)
+        .or(metadata.text)
+        .or(metadata.description)
+        .unwrap_or("")
 }
 
 fn render_graphics(node: &LtxmlNode, out: &mut String) {
@@ -243,7 +320,7 @@ fn render_graphics(node: &LtxmlNode, out: &mut String) {
     out.push('>');
 }
 
-fn render_table_cell(node: &LtxmlNode, out: &mut String, context: RenderContext) {
+fn render_table_cell(node: &LtxmlNode, out: &mut String, context: RenderContext<'_>) {
     let tag = if node.attr("thead").is_some() { "th" } else { "td" };
     out.push('<');
     out.push_str(tag);
@@ -283,6 +360,63 @@ fn end_tag(out: &mut String, tag: &str) {
     out.push_str("</");
     out.push_str(tag);
     out.push('>');
+}
+
+fn write_math_attrs(
+    node: &LtxmlNode,
+    metadata: &MathMetadata<'_>,
+    out: &mut String,
+    base_class: &str,
+) {
+    write_common_attrs(node, out, base_class);
+
+    if let Some(tex) = metadata.tex {
+        out.push_str(" data-tex=\"");
+        escape_attr(tex, out);
+        out.push('"');
+    }
+
+    if let Some(content_tex) = metadata.content_tex {
+        out.push_str(" data-content-tex=\"");
+        escape_attr(content_tex, out);
+        out.push('"');
+    }
+
+    if let Some(text) = metadata.text {
+        out.push_str(" data-text=\"");
+        escape_attr(text, out);
+        out.push('"');
+    }
+
+    if let Some(src) = metadata.image_src {
+        out.push_str(" data-altimg=\"");
+        escape_attr(src, out);
+        out.push('"');
+    }
+
+    if let Some(width) = metadata.image_width {
+        out.push_str(" data-altimg-width=\"");
+        escape_attr(width, out);
+        out.push('"');
+    }
+
+    if let Some(height) = metadata.image_height {
+        out.push_str(" data-altimg-height=\"");
+        escape_attr(height, out);
+        out.push('"');
+    }
+
+    if let Some(depth) = metadata.image_depth {
+        out.push_str(" data-altimg-depth=\"");
+        escape_attr(depth, out);
+        out.push('"');
+    }
+
+    if let Some(description) = metadata.description {
+        out.push_str(" aria-label=\"");
+        escape_attr(description, out);
+        out.push('"');
+    }
 }
 
 fn write_common_attrs(node: &LtxmlNode, out: &mut String, base_class: &str) {
@@ -360,6 +494,17 @@ fn escape_text(raw: &str, out: &mut String) {
     }
 }
 
+fn escape_script_text(raw: &str, out: &mut String) {
+    for ch in raw.chars() {
+        match ch {
+            '<' => out.push_str("\\u003c"),
+            '>' => out.push_str("\\u003e"),
+            '&' => out.push_str("\\u0026"),
+            _ => out.push(ch),
+        }
+    }
+}
+
 fn escape_attr(raw: &str, out: &mut String) {
     for ch in raw.chars() {
         match ch {
@@ -377,6 +522,30 @@ fn escape_attr(raw: &str, out: &mut String) {
 mod tests {
     use super::*;
     use tectonic_ltxml_ir::LtxmlNode;
+
+    #[test]
+    fn renders_math_metadata_attributes() {
+        let node = LtxmlNode::new("ltx:Math")
+            .with_attr("mode", "display")
+            .with_attr("tex", "x<y")
+            .with_attr("content-tex", "less-than")
+            .with_attr("text", "x less than y")
+            .with_attr("imagesrc", "math.svg")
+            .with_attr("imagewidth", "42")
+            .with_attr("imageheight", "10")
+            .with_attr("imagedepth", "2")
+            .with_attr("description", "inequality");
+
+        let html = render_fragment(&node);
+        assert!(html.contains("data-tex=\"x&lt;y\""));
+        assert!(html.contains("data-content-tex=\"less-than\""));
+        assert!(html.contains("data-text=\"x less than y\""));
+        assert!(html.contains("data-altimg=\"math.svg\""));
+        assert!(html.contains("data-altimg-width=\"42\""));
+        assert!(html.contains("data-altimg-height=\"10\""));
+        assert!(html.contains("data-altimg-depth=\"2\""));
+        assert!(html.contains("aria-label=\"inequality\""));
+    }
 
     #[test]
     fn escapes_text_and_attributes() {

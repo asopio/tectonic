@@ -129,6 +129,58 @@ impl Diagnostic {
     }
 }
 
+/// The display mode of a LaTeXML math node.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum MathMode {
+    /// Inline math.
+    Inline,
+    /// Display math.
+    Display,
+}
+
+impl MathMode {
+    /// Parse a LaTeXML math mode attribute value.
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "inline" => Some(Self::Inline),
+            "display" => Some(Self::Display),
+            _ => None,
+        }
+    }
+
+    /// Return the LaTeXML attribute value for this mode.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Inline => "inline",
+            Self::Display => "display",
+        }
+    }
+}
+
+/// Metadata associated with an `ltx:Math` node.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MathMetadata<'a> {
+    /// The math display mode.
+    pub mode: MathMode,
+    /// The source TeX string, if available.
+    pub tex: Option<&'a str>,
+    /// A more semantic TeX string, if available.
+    pub content_tex: Option<&'a str>,
+    /// Textual representation of the math, if available.
+    pub text: Option<&'a str>,
+    /// Raster/vector fallback image source, if available.
+    pub image_src: Option<&'a str>,
+    /// Fallback image width in pixels, if available.
+    pub image_width: Option<&'a str>,
+    /// Fallback image height in pixels, if available.
+    pub image_height: Option<&'a str>,
+    /// Fallback image baseline depth in pixels, if available.
+    pub image_depth: Option<&'a str>,
+    /// Accessible description of the math, if available.
+    pub description: Option<&'a str>,
+}
+
 /// A child of a LaTeXML-shaped node.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
@@ -224,6 +276,30 @@ impl LtxmlNode {
     /// Iterate over space-separated CSS class tokens.
     pub fn class_tokens(&self) -> impl Iterator<Item = &str> {
         self.attr("class").into_iter().flat_map(str::split_whitespace)
+    }
+
+    /// Return true if this node is an `ltx:Math` element.
+    pub fn is_math(&self) -> bool {
+        self.name.as_str() == "ltx:Math"
+    }
+
+    /// Return math metadata if this node is an `ltx:Math` element.
+    pub fn math_metadata(&self) -> Option<MathMetadata<'_>> {
+        if !self.is_math() {
+            return None;
+        }
+
+        Some(MathMetadata {
+            mode: self.attr("mode").and_then(MathMode::parse).unwrap_or(MathMode::Inline),
+            tex: self.attr("tex"),
+            content_tex: self.attr("content-tex"),
+            text: self.attr("text"),
+            image_src: self.attr("imagesrc"),
+            image_width: self.attr("imagewidth"),
+            image_height: self.attr("imageheight"),
+            image_depth: self.attr("imagedepth"),
+            description: self.attr("description"),
+        })
     }
 
     /// Serialize this node and descendants as LaTeXML-like XML.
@@ -532,6 +608,29 @@ mod tests {
         let xml = doc.to_xml_string();
         assert!(xml.contains("<ltx:title>Intro &amp; Motivation</ltx:title>"));
         assert!(xml.contains("tex=\"x^2 &lt; y\""));
+    }
+
+    #[test]
+    fn exposes_math_metadata() {
+        let node = LtxmlNode::new("ltx:Math")
+            .with_attr("mode", "display")
+            .with_attr("tex", "E=mc^2")
+            .with_attr("content-tex", "energy")
+            .with_attr("imagesrc", "eq.svg")
+            .with_attr("imagewidth", "120")
+            .with_attr("imageheight", "40")
+            .with_attr("imagedepth", "8")
+            .with_attr("description", "energy equation");
+
+        let metadata = node.math_metadata().unwrap();
+        assert_eq!(metadata.mode, MathMode::Display);
+        assert_eq!(metadata.tex, Some("E=mc^2"));
+        assert_eq!(metadata.content_tex, Some("energy"));
+        assert_eq!(metadata.image_src, Some("eq.svg"));
+        assert_eq!(metadata.image_width, Some("120"));
+        assert_eq!(metadata.image_height, Some("40"));
+        assert_eq!(metadata.image_depth, Some("8"));
+        assert_eq!(metadata.description, Some("energy equation"));
     }
 
     #[test]
