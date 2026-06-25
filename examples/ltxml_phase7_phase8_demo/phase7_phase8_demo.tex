@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{Phase 7/8 Demo: Graphics, Tables, and Profiles}
+\author{Tectonic LaTeXML IR Prototype}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Overview}\label{sec:overview}
+This document is a regular LaTeX file that should compile with the Tectonic CLI.
+It mirrors the accompanying \texttt{phase7\_phase8\_demo.tsem} event stream used by the prototype HTML pipeline.
+The example exercises graphics normalization, table normalization, references, and MathJax profile output.
+
+\section{Math and references}\label{sec:math}
+Equation~\ref{eq:quad} is rendered as display math in the prototype HTML profile.
+\begin{equation}\label{eq:quad}
+  x^2 + y^2 = z^2
+\end{equation}
+See Section~\ref{sec:overview} for the introduction.
+
+\section{Raster graphics}\label{sec:graphics}
+Figure~\ref{fig:plot} includes a raster image.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.55\linewidth]{phase7_plot.png}
+  \caption{A small raster image used by the Phase 7 graphics normalization demo.}\label{fig:plot}
+\end{figure}
+
+\section{Tables}\label{sec:tables}
+Table~\ref{tab:values} demonstrates a simple table whose prototype IR normalizer wraps direct rows in \texttt{ltx:tbody} and preserves alignment/header metadata.
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lr}
+    \toprule
+    Quantity & Value \\
+    \midrule
+    Events & 42 \\
+    Bins & 7 \\
+    \bottomrule
+  \end{tabular}
+  \caption{A small table for the Phase 7 table normalization demo.}\label{tab:values}
+\end{table}
+
+\end{document}

@@ -433,7 +433,7 @@ HTML mapping examples:
 
 ## Implementation Progress
 
-As of the current `dev-xmlir-phase-6` branch, the first six implementation phases have been completed as incremental vertical slices:
+As of the current `dev-xmlir-phase-8` branch, the first eight implementation phases have been completed as incremental vertical slices:
 
 | Phase | Status | Commit | Main artifacts |
 |---|---|---|---|
@@ -443,6 +443,8 @@ As of the current `dev-xmlir-phase-6` branch, the first six implementation phase
 | Phase 4: Math strategy | Complete | `ded04c58` | `MathMetadata`, MathJax-compatible rendering mode |
 | Phase 5: References/citations/bibliography | Complete | `91b036a0` | `crates/ltxml_post` reference and bibliography post-processing |
 | Phase 6: Package/class binding oxidation registry | Complete | `ac7e9a22` | `crates/ltxml_bindings`, package-specific `.ltxmlir.tex` support files |
+| Phase 7: Graphics and tables | Complete | `40665729` | graphics/table normalization in `crates/ltxml_post` |
+| Phase 8: Output profiles | Complete | `cd343783` | `crates/ltxml_profiles`, profile-aware `compile_tsem` demo |
 
 The current implementation is still a prototype and does not yet wire these crates into `tectonic -X compile --outfmt html`; instead it demonstrates the pipeline from `tsem:` semantic events through `LtxmlIr`, post-processing, and HTML rendering.
 
@@ -453,6 +455,7 @@ The current implementation is still a prototype and does not yet wire these crat
 - `tectonic_ltxml_html`: single-page HTML renderer for the current `ltx:*` subset, including MathJax-compatible math rendering.
 - `tectonic_ltxml_post`: post-processing for labels, references, citations, bibliography items, and unresolved-reference diagnostics.
 - `tectonic_ltxml_bindings`: registry of oxidized binding coverage and support-file metadata for Tier 1 bindings.
+- `tectonic_ltxml_profiles`: native output profiles (`article`, `mathjax`, `atlas`) that configure templates, CSS resources, MathJax behavior, validation flags, asset behavior, and debug IR retention.
 
 ### Current semantic support files
 
@@ -492,15 +495,55 @@ This validates the current end-to-end prototype path:
 tsem events -> LtxmlIr -> resolve refs/citations -> HTML + MathJax-compatible math
 ```
 
-### Current test status
+A richer Phase 7/8 demonstration was also added under:
 
-The latest Phase 6 test run used:
-
-```bash
-pixi run cargo test -p tectonic_ltxml_bindings -p tectonic_ltxml_ir -p tectonic_engine_spx2ltxml -p tectonic_ltxml_html -p tectonic_ltxml_post --manifest-path Cargo.toml
+```text
+examples/ltxml_phase7_phase8_demo/
 ```
 
-Result: `32` tests passed.
+It contains:
+
+- `phase7_phase8_demo.tex`: a regular LaTeX document with `amsmath`, `graphicx`, `booktabs`, `hyperref`, section/equation/figure/table references, a raster image, and a table.
+- `phase7_plot.png`: image asset used by the LaTeX and semantic demos.
+- `phase7_phase8_demo.pdf`: output produced by the prebuilt pixi `tectonic` CLI.
+- `phase7_phase8_demo.tsem`: current hand-authored semantic event stream equivalent.
+- `phase7_phase8_demo.html`: output generated through the profile-based prototype pipeline using the `atlas` profile.
+
+The LaTeX/PDF side was compiled with:
+
+```bash
+pixi run tectonic -X compile --outdir examples/ltxml_phase7_phase8_demo \
+  examples/ltxml_phase7_phase8_demo/phase7_phase8_demo.tex
+```
+
+The semantic/HTML side was compiled with:
+
+```bash
+pixi run cargo run -p tectonic_ltxml_post --example compile_tsem --manifest-path Cargo.toml -- \
+  examples/ltxml_phase7_phase8_demo/phase7_phase8_demo.tsem \
+  examples/ltxml_phase7_phase8_demo/phase7_phase8_demo.html \
+  atlas
+```
+
+This richer demo exercises:
+
+- Phase 7 graphics candidate resolution (`phase7_plot`/candidates -> `phase7_plot.png`).
+- Preservation of image alt text, width, and height.
+- Phase 7 table normalization (`ltx:tr` rows wrapped in `ltx:tbody`).
+- Header cells rendered as `<th>` with alignment preserved.
+- Resolved section/equation/figure/table references.
+- Phase 8 profile selection via the `atlas` profile.
+- MathJax-compatible display math output.
+
+### Current test status
+
+The latest Phase 8 test run used:
+
+```bash
+pixi run cargo test -p tectonic_ltxml_profiles -p tectonic_ltxml_bindings -p tectonic_ltxml_ir -p tectonic_engine_spx2ltxml -p tectonic_ltxml_html -p tectonic_ltxml_post --manifest-path Cargo.toml
+```
+
+Result: `37` tests passed.
 
 ## Implementation Roadmap
 
@@ -715,7 +758,7 @@ Success criteria:
 
 - Common scientific figures and tables are readable and accessible in HTML.
 
-### Phase 8: Output Profiles and User Experience
+### Phase 8: Output Profiles and User Experience — Initial Implementation Complete
 
 Add profiles similar to LaTeXML's `resources/Profiles/*.opt`, but native to Tectonic.
 
@@ -853,11 +896,16 @@ The original near-term tasks have mostly been implemented through Phase 6. The n
    - Add robust JSON/string escaping in TeX support macros.
    - Add tests for special characters in titles, labels, citations, and math source.
 
-4. **Start Phase 7 graphics/table hardening**
-   - Resolve graphic candidates and output asset paths.
-   - Improve table row/cell capture and header/body/footer semantics.
+4. **Continue Phase 7 graphics/table hardening**
+   - Copy/emit image assets through Tectonic's output layer.
+   - Add conversion hooks for non-web formats such as PDF/EPS.
+   - Improve table row/cell capture from real TeX-generated events.
 
-5. **Add LaTeXML differential fixtures**
+5. **Wire Phase 8 profiles into the main CLI**
+   - Add `--html-profile`, `--html-math`, and `--keep-ltxml-ir` style options.
+   - Route profile settings into `tectonic_ltxml_html` and post-processing.
+
+6. **Add LaTeXML differential fixtures**
    - Generate LaTeXML XML for a small fixture corpus.
    - Add structural comparison tests or documented-difference snapshots.
 
@@ -873,7 +921,7 @@ The current implementation has support files and `tsem` fixtures for article-lik
 
 ### Milestone 3: Oxidized figures, equations, tables, and bibliography — Partially Complete
 
-The current prototype supports the relevant `ltx:*` structures in event fixtures, HTML rendering, math metadata, and reference/bibliography post-processing. Real TeX-generated binding coverage still needs integration testing.
+The current prototype supports the relevant `ltx:*` structures in event fixtures, HTML rendering, math metadata, reference/bibliography post-processing, graphics candidate normalization, and table body/header normalization. Real TeX-generated binding coverage still needs integration testing.
 
 ### Milestone 4: ATLAS/HEP pilot — Pending
 
