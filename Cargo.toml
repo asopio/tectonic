@@ -54,6 +54,7 @@ members = [
     "crates/errors",
     "crates/geturl",
     "crates/io_base",
+    "crates/ltxml_html",
     "crates/ltxml_ir",
     "crates/mac_core",
     "crates/pdf_io",
