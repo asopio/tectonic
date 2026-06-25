@@ -1,0 +1,40 @@
+% This file demonstrates how the oxidized bindings are meant to be used.
+% In a future integrated pipeline, Tectonic would load tectonic-semantic-html.tex
+% and package-specific *.ltxmlir.tex files automatically in HTML/LtxmlIr mode.
+
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+
+% Conceptual future preload:
+% \input{tectonic-semantic-html.tex}
+% \input{ltxml-bindings/article.ltxmlir.tex}
+% \input{ltxml-bindings/amsmath.ltxmlir.tex}
+% \input{ltxml-bindings/graphicx.ltxmlir.tex}
+% \input{ltxml-bindings/hyperref.ltxmlir.tex}
+% \input{ltxml-bindings/natbib.ltxmlir.tex}
+
+\title{Oxidized Binding Demo}
+\author{Ada Lovelace}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+This paragraph contains \emph{emphasis}, inline math $x^2$, a reference to Section~\ref{sec:intro}, and a citation \cite{knuth84}.
+
+\begin{equation}\label{eq:energy}
+E = mc^2
+\end{equation}
+
+\begin{figure}
+\includegraphics{plot.png}
+\caption{A raster plot.}\label{fig:plot}
+\end{figure}
+
+\begin{thebibliography}{1}
+\bibitem{knuth84} Donald Knuth. \emph{The TeXbook}. 1984.
+\end{thebibliography}
+\end{document}

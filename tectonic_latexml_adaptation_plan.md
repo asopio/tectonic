@@ -431,6 +431,77 @@ HTML mapping examples:
 | `ltx:cite` / `ltx:bibref` | `<a href="#bib..." class="ltx_cite">[...]</a>` |
 | `ltx:bibliography` | `<section class="ltx_bibliography">` |
 
+## Implementation Progress
+
+As of the current `dev-xmlir-phase-6` branch, the first six implementation phases have been completed as incremental vertical slices:
+
+| Phase | Status | Commit | Main artifacts |
+|---|---|---|---|
+| Phase 1: LaTeXML-shaped IR and event infrastructure | Complete | `4ab7beea` | `crates/ltxml_ir`, `crates/engine_spx2ltxml` |
+| Phase 2: Core article semantic patches/fixtures | Complete | `178fa9c6` | `crates/engine_xetex/support/tectonic-semantic-html.tex`, article `tsem` fixture tests |
+| Phase 3: Minimal HTML renderer | Complete | `8bdcd1d1` | `crates/ltxml_html` single-page renderer |
+| Phase 4: Math strategy | Complete | `ded04c58` | `MathMetadata`, MathJax-compatible rendering mode |
+| Phase 5: References/citations/bibliography | Complete | `91b036a0` | `crates/ltxml_post` reference and bibliography post-processing |
+| Phase 6: Package/class binding oxidation registry | Complete | `ac7e9a22` | `crates/ltxml_bindings`, package-specific `.ltxmlir.tex` support files |
+
+The current implementation is still a prototype and does not yet wire these crates into `tectonic -X compile --outfmt html`; instead it demonstrates the pipeline from `tsem:` semantic events through `LtxmlIr`, post-processing, and HTML rendering.
+
+### Current implemented crates
+
+- `tectonic_ltxml_ir`: Rust-native, LaTeXML-shaped IR with `ltx:*` node/attribute preservation, JSON `tsem:` parsing, XML serialization, diagnostics, and math metadata helpers.
+- `tectonic_engine_spx2ltxml`: SPX-facing semantic-special extractor that consumes `tsem:` specials into `LtxmlIr`.
+- `tectonic_ltxml_html`: single-page HTML renderer for the current `ltx:*` subset, including MathJax-compatible math rendering.
+- `tectonic_ltxml_post`: post-processing for labels, references, citations, bibliography items, and unresolved-reference diagnostics.
+- `tectonic_ltxml_bindings`: registry of oxidized binding coverage and support-file metadata for Tier 1 bindings.
+
+### Current semantic support files
+
+- `crates/engine_xetex/support/tectonic-semantic-html.tex`
+- `crates/engine_xetex/support/ltxml-bindings/article.ltxmlir.tex`
+- `crates/engine_xetex/support/ltxml-bindings/amsmath.ltxmlir.tex`
+- `crates/engine_xetex/support/ltxml-bindings/graphicx.ltxmlir.tex`
+- `crates/engine_xetex/support/ltxml-bindings/hyperref.ltxmlir.tex`
+- `crates/engine_xetex/support/ltxml-bindings/natbib.ltxmlir.tex`
+- `crates/engine_xetex/support/ltxml-bindings/tabular.ltxmlir.tex`
+
+### Current demo artifact
+
+A small binding demonstration was added under:
+
+```text
+examples/ltxml_bindings_demo/
+```
+
+It contains:
+
+- `binding_demo.tex`: conceptual LaTeX source showing how the oxidized bindings are intended to map from common article/package constructs.
+- `binding_demo.tsem`: current hand-authored semantic event stream equivalent.
+- `binding_demo.html`: generated HTML output.
+
+The demo was compiled with:
+
+```bash
+pixi run cargo run -p tectonic_ltxml_post --example compile_tsem --manifest-path Cargo.toml -- \
+  examples/ltxml_bindings_demo/binding_demo.tsem \
+  examples/ltxml_bindings_demo/binding_demo.html
+```
+
+This validates the current end-to-end prototype path:
+
+```text
+tsem events -> LtxmlIr -> resolve refs/citations -> HTML + MathJax-compatible math
+```
+
+### Current test status
+
+The latest Phase 6 test run used:
+
+```bash
+pixi run cargo test -p tectonic_ltxml_bindings -p tectonic_ltxml_ir -p tectonic_engine_spx2ltxml -p tectonic_ltxml_html -p tectonic_ltxml_post --manifest-path Cargo.toml
+```
+
+Result: `32` tests passed.
+
 ## Implementation Roadmap
 
 ### Phase 0: Design and Test Corpus
@@ -455,7 +526,7 @@ Success criteria:
 - The same source can be compiled to semantic debug output without crashing.
 - Unsupported constructs produce diagnostics, not panics.
 
-### Phase 1: LaTeXML-Shaped IR and Event Infrastructure
+### Phase 1: LaTeXML-Shaped IR and Event Infrastructure — Complete
 
 Deliverables:
 
@@ -475,7 +546,7 @@ Success criteria:
 - Serialized XML uses `ltx:*` names and attributes close enough to compare with LaTeXML fixtures.
 - Text escaping, Unicode handling, nested nodes, labels, unknown elements/attributes, and diagnostics work.
 
-### Phase 2: Core LaTeX Semantic Patches
+### Phase 2: Core LaTeX Semantic Patches — Complete as Fixture/Support Slice
 
 Deliverables:
 
@@ -509,7 +580,7 @@ Success criteria:
 - The `article` fixture output can be structurally compared against LaTeXML's XML with only documented differences.
 - HTML renderer can output readable static HTML from the same IR.
 
-### Phase 3: Minimal HTML Renderer
+### Phase 3: Minimal HTML Renderer — Complete
 
 Deliverables:
 
@@ -531,7 +602,7 @@ Success criteria:
 - Section hierarchy, paragraphs, emphasis, links, equations, figures, captions, and bibliography placeholders are present.
 - Output does not require document-authored templates.
 
-### Phase 4: Math Strategy
+### Phase 4: Math Strategy — Initial Implementation Complete
 
 Tectonic has a major opportunity to improve on LaTeXML by combining semantic math with high-fidelity layout.
 
@@ -562,7 +633,7 @@ Success criteria:
 - Equation references link correctly.
 - Math source is preserved for accessibility, search, and fallback.
 
-### Phase 5: Cross-References, Citations, and Bibliographies
+### Phase 5: Cross-References, Citations, and Bibliographies — Initial Implementation Complete
 
 Deliverables:
 
@@ -765,69 +836,56 @@ Mitigation:
 - Verify license status for any direct resource reuse.
 - Prefer fresh Rust implementations and fresh CSS unless reuse is explicitly compatible.
 
-## Milestone Plan
+## Updated Near-Term Next Steps
 
-### Milestone 1: Hand-authored `LtxmlIr` proof of concept
+The original near-term tasks have mostly been implemented through Phase 6. The next implementation focus should be:
 
-- Add `LtxmlIr` crate.
-- Add `tsem:` parser targeting `ltx:*` element names and attributes.
-- Convert hand-authored semantic specials to `.ltxml.xml` and `.ltxml-ir.json`.
-- Validate against the initial LaTeXML schema subset.
-- Render minimal HTML from `LtxmlIr`.
+1. **Wire the prototype into the main processing pipeline**
+   - Add an experimental `OutputFormat::LtxmlIr` or internal `--keep-ltxml-ir` path.
+   - Route SPX output through `tectonic_engine_spx2ltxml`.
+   - Optionally route post-processed `LtxmlIr` through `tectonic_ltxml_html`.
 
-### Milestone 2: Oxidized `article` baseline
+2. **Replace hand-authored `tsem` fixtures with TeX-generated semantic events**
+   - Make `tectonic-semantic-html.tex` and package-specific `.ltxmlir.tex` files loadable in an integration test.
+   - Exercise real TeX documents instead of only line-oriented `tsem` streams.
 
-- Auto-load semantic LaTeX patch file.
-- Oxidize the minimal `article.cls.ltxml` behavior needed for title, authors, abstract, sections, paragraphs, emphasis, labels, refs, inline/display math.
-- Compare Tectonic `LtxmlIr` XML against LaTeXML XML for simple article fixtures.
-- Render single-page HTML.
+3. **Improve binding safety**
+   - Add robust JSON/string escaping in TeX support macros.
+   - Add tests for special characters in titles, labels, citations, and math source.
 
-### Milestone 3: Oxidized figures, equations, tables, and bibliography
+4. **Start Phase 7 graphics/table hardening**
+   - Resolve graphic candidates and output asset paths.
+   - Improve table row/cell capture and header/body/footer semantics.
 
-- Oxidize relevant `latex_constructs`, `amsmath`, `graphicx`, and basic bibliography binding behavior.
-- Support `ltx:figure`, `ltx:table`, `ltx:caption`, `ltx:tabular`, `ltx:tr`, `ltx:td`, `ltx:graphics`, `ltx:equation`, and `ltx:Math` structures.
-- Resolve equation and section references.
-- Parse/render `.bbl` bibliography.
-- Support numeric citations.
+5. **Add LaTeXML differential fixtures**
+   - Generate LaTeXML XML for a small fixture corpus.
+   - Add structural comparison tests or documented-difference snapshots.
 
-### Milestone 4: ATLAS/HEP pilot
+## Milestone Plan Status
 
-- Select one representative ATLAS paper/note.
-- Inventory macros and packages.
-- Add targeted bindings.
-- Produce usable HTML with known fallbacks.
+### Milestone 1: Hand-authored `LtxmlIr` proof of concept — Complete
 
-### Milestone 5: Broader package hardening
+Implemented by `crates/ltxml_ir` and `crates/engine_spx2ltxml`.
 
-- Add `amsmath`, `graphicx`, `hyperref`, `natbib`, `booktabs`, `longtable`, `siunitx`, `cleveref` support as driven by corpus.
-- Add validation and accessibility gates.
+### Milestone 2: Oxidized `article` baseline — Partially Complete
 
-### Milestone 6: MathML and advanced output
+The current implementation has support files and `tsem` fixtures for article-like documents, but does not yet auto-load these bindings through the main Tectonic compile pipeline.
 
-- Implement or integrate Rust-side math semantic parsing.
-- Generate Presentation MathML with TeX annotations.
-- Support split output and richer templates.
+### Milestone 3: Oxidized figures, equations, tables, and bibliography — Partially Complete
 
-## Recommended Near-Term Implementation Tasks
+The current prototype supports the relevant `ltx:*` structures in event fixtures, HTML rendering, math metadata, and reference/bibliography post-processing. Real TeX-generated binding coverage still needs integration testing.
 
-1. Add a design issue or RFC in the repository for `LtxmlIr` and `tsem:` events.
-2. Implement `crates/ltxml_ir` with serialization and unit tests.
-3. Add `Special::SemanticEvent` parsing or a new SPX semantic processor.
-4. Build a minimal `engine_spx2ltxml` or `engine_spx2sem` proof of concept.
-5. Write `tectonic-semantic-html.tex` with explicit test macros that target `ltx:*` elements, such as:
+### Milestone 4: ATLAS/HEP pilot — Pending
 
-   ```tex
-   \def\TectonicBeginSection#1#2{\special{tsem:{"event":"begin","element":"ltx:section","attrs":{"refnum":"#1"}}}\special{tsem:{"event":"begin","element":"ltx:title"}}#2\special{tsem:{"event":"end","element":"ltx:title"}}}
-   ```
+Select a representative ATLAS paper/note after the pipeline can compile real TeX to `LtxmlIr`.
 
-   Then replace the JSON string construction with safe escaping helpers.
+### Milestone 5: Broader package hardening — Pending
 
-6. Add a simple article test document and snapshot expected `.ltxml.xml` and `.ltxml-ir.json`.
-7. Add a compatibility diff harness comparing Tectonic `LtxmlIr` XML to LaTeXML XML for fixtures.
-8. Add an HTML renderer that maps `LtxmlIr` to one static page.
-9. Expand macro patches to real `\section`, `\subsection`, `\label`, `\ref`, `\emph`, math delimiters, and figure/caption.
-10. Add diagnostics for unknown/unbalanced semantic events and unsupported binding features.
-11. Oxidize the next binding only after the current binding has fixtures and compatibility diffs.
+The binding registry records Tier 1 packages and support-file stubs; full hardening remains future work.
+
+### Milestone 6: MathML and advanced output — Pending
+
+Current math output preserves TeX source and supports MathJax-compatible HTML. MathML/XMath generation remains future work.
 
 ## Definition of Done for a Useful First Release
 

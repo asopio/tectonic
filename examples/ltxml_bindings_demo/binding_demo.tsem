@@ -1,0 +1,50 @@
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Oxidized Binding Demo"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:creator","attrs":{"role":"author"}}
+tsem:{"event":"begin","element":"ltx:personname"}
+tsem:{"event":"text","text":"Ada Lovelace"}
+tsem:{"event":"end","element":"ltx:personname"}
+tsem:{"event":"end","element":"ltx:creator"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S1","labels":"LABEL:sec:intro","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Introduction"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"This paragraph contains "}
+tsem:{"event":"begin","element":"ltx:emph"}
+tsem:{"event":"text","text":"emphasis"}
+tsem:{"event":"end","element":"ltx:emph"}
+tsem:{"event":"text","text":", inline math "}
+tsem:{"event":"math","attrs":{"mode":"inline","tex":"x^2"}}
+tsem:{"event":"text","text":", a reference to Section "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"sec:intro"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":", and a citation "}
+tsem:{"event":"begin","element":"ltx:cite"}
+tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"knuth84"}}
+tsem:{"event":"end","element":"ltx:bibref"}
+tsem:{"event":"end","element":"ltx:cite"}
+tsem:{"event":"text","text":"."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"begin","element":"ltx:equation","attrs":{"xml:id":"E1","labels":"LABEL:eq:energy","refnum":"1"}}
+tsem:{"event":"math","attrs":{"mode":"display","tex":"E = mc^2"}}
+tsem:{"event":"end","element":"ltx:equation"}
+tsem:{"event":"begin","element":"ltx:figure","attrs":{"xml:id":"F1","labels":"LABEL:fig:plot","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:graphics","attrs":{"graphic":"plot.png","imagesrc":"plot.png","description":"A raster plot"}}
+tsem:{"event":"end","element":"ltx:graphics"}
+tsem:{"event":"begin","element":"ltx:caption"}
+tsem:{"event":"text","text":"A raster plot."}
+tsem:{"event":"end","element":"ltx:caption"}
+tsem:{"event":"end","element":"ltx:figure"}
+tsem:{"event":"end","element":"ltx:section"}
+tsem:{"event":"begin","element":"ltx:bibliography","attrs":{"xml:id":"Bib"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"References"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:biblist"}
+tsem:{"event":"begin","element":"ltx:bibitem","attrs":{"xml:id":"bib.knuth84","key":"knuth84","refnum":"1"}}
+tsem:{"event":"text","text":"Donald Knuth. The TeXbook. 1984."}
+tsem:{"event":"end","element":"ltx:bibitem"}
+tsem:{"event":"end","element":"ltx:biblist"}
+tsem:{"event":"end","element":"ltx:bibliography"}
