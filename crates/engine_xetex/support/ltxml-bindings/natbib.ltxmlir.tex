@@ -7,7 +7,31 @@
 \catcode`\@=11
 
 \let\ltxmlir@natbib@orig@cite\cite
-\def\cite#1{\ltxmlir@begin{ltx:cite}\special{tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"#1"}}}\special{tsem:{"event":"end","element":"ltx:bibref"}}\ltxmlir@end{ltx:cite}\ltxmlir@natbib@orig@cite{#1}}
+\def\cite{\@ifnextchar[{\ltxmlir@cite@opt}{\ltxmlir@cite@noopt}}
+\def\ltxmlir@cite@noopt#1{%
+  \ltxmlir@begin{ltx:cite}%
+  \special{tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"#1"}}}%
+  \special{tsem:{"event":"end","element":"ltx:bibref"}}%
+  \ltxmlir@end{ltx:cite}%
+  \ltxmlir@natbib@orig@cite{#1}%
+}
+\def\ltxmlir@cite@opt[#1]{%
+  \@ifnextchar[{\ltxmlir@cite@twoopt[#1]}{\ltxmlir@cite@oneopt[#1]}%
+}
+\def\ltxmlir@cite@oneopt[#1]#2{%
+  \ltxmlir@begin{ltx:cite}%
+  \special{tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"#2"}}}%
+  \special{tsem:{"event":"end","element":"ltx:bibref"}}%
+  \ltxmlir@end{ltx:cite}%
+  \ltxmlir@natbib@orig@cite[#1]{#2}%
+}
+\def\ltxmlir@cite@twoopt[#1][#2]#3{%
+  \ltxmlir@begin{ltx:cite}%
+  \special{tsem:{"event":"begin","element":"ltx:bibref","attrs":{"bibrefs":"#3"}}}%
+  \special{tsem:{"event":"end","element":"ltx:bibref"}}%
+  \ltxmlir@end{ltx:cite}%
+  \ltxmlir@natbib@orig@cite[#1][#2]{#3}%
+}
 
 \catcode`\@=12
 \endinput

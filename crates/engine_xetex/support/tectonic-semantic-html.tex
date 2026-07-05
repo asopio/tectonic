@@ -11,13 +11,20 @@
 
 \catcode`\@=11
 
+% State flags tracking which sectioning elements are currently open.
+\newif\ifltxmlir@in@section
+\newif\ifltxmlir@in@subsection
+\newif\ifltxmlir@in@paragraph
+
 \def\ltxmlir@begin#1{\special{tsem:{"event":"begin","element":"#1"}}}
 \def\ltxmlir@end#1{\special{tsem:{"event":"end","element":"#1"}}}
-\def\ltxmlir@text#1{\special{tsem:{"event":"text","text":"#1"}}}
+\def\ltxmlir@text#1{\special{tsem-text:#1}}
 \def\ltxmlir@begin@id#1#2{\special{tsem:{"event":"begin","element":"#1","attrs":{"xml:id":"#2"}}}}
 \def\ltxmlir@begin@class#1#2{\special{tsem:{"event":"begin","element":"#1","attrs":{"class":"#2"}}}}
-\def\ltxmlir@math#1#2{\special{tsem:{"event":"math","attrs":{"mode":"#1","tex":"#2"}}}}
-\def\ltxmlir@graphics#1{\special{tsem:{"event":"begin","element":"ltx:graphics","attrs":{"graphic":"#1"}}}\special{tsem:{"event":"end","element":"ltx:graphics"}}}
+% \ltxmlir@math{<mode>}{<tex>} — mode must be "inline" or "display" (no colons).
+% The TeX source is detokenized so control sequences are emitted as plain strings.
+\def\ltxmlir@math#1#2{\special{tsem-math:#1:\detokenize{#2}}}
+\def\ltxmlir@graphics#1{\special{tsem-graphics:#1}}
 
 \let\ltxmlir@orig@title\title
 \def\title#1{\gdef\ltxmlir@title{#1}\ltxmlir@orig@title{#1}}
@@ -44,6 +51,10 @@
 
 \let\ltxmlir@orig@section\section
 \def\section#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\ltxmlir@in@paragraphfalse\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\ltxmlir@in@subsectionfalse\fi
+  \ifltxmlir@in@section\ltxmlir@end{ltx:section}\fi
+  \ltxmlir@in@sectiontrue
   \ltxmlir@begin{ltx:section}%
   \ltxmlir@begin{ltx:title}%
   \ltxmlir@text{#1}%
@@ -53,6 +64,9 @@
 
 \let\ltxmlir@orig@subsection\subsection
 \def\subsection#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\ltxmlir@in@paragraphfalse\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\fi
+  \ltxmlir@in@subsectiontrue
   \ltxmlir@begin{ltx:subsection}%
   \ltxmlir@begin{ltx:title}%
   \ltxmlir@text{#1}%
@@ -62,6 +76,8 @@
 
 \let\ltxmlir@orig@paragraph\paragraph
 \def\paragraph#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\fi
+  \ltxmlir@in@paragraphtrue
   \ltxmlir@begin{ltx:paragraph}%
   \ltxmlir@begin{ltx:title}%
   \ltxmlir@text{#1}%
@@ -71,9 +87,9 @@
 
 \let\ltxmlir@orig@enddocument\enddocument
 \def\enddocument{%
-  \ltxmlir@end{ltx:paragraph}%
-  \ltxmlir@end{ltx:subsection}%
-  \ltxmlir@end{ltx:section}%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\fi
+  \ifltxmlir@in@section\ltxmlir@end{ltx:section}\fi
   \ltxmlir@orig@enddocument
 }
 
@@ -89,7 +105,9 @@
 \def\ltxmlir@display@math#1{\ltxmlir@begin{ltx:equation}\ltxmlir@math{display}{#1}\ltxmlir@end{ltx:equation}}
 
 \let\ltxmlir@orig@includegraphics\includegraphics
-\def\includegraphics#1{\ltxmlir@graphics{#1}\ltxmlir@orig@includegraphics{#1}}
+\def\includegraphics{\@ifnextchar[{\ltxmlir@ig@opt}{\ltxmlir@ig@noopt}}
+\def\ltxmlir@ig@opt[#1]#2{\ltxmlir@graphics{#2}\ltxmlir@orig@includegraphics[#1]{#2}}
+\def\ltxmlir@ig@noopt#1{\ltxmlir@graphics{#1}\ltxmlir@orig@includegraphics{#1}}
 
 \let\ltxmlir@orig@caption\caption
 \def\caption#1{%

@@ -7,7 +7,9 @@
 \catcode`\@=11
 
 \let\ltxmlir@graphicx@orig@includegraphics\includegraphics
-\def\includegraphics#1{\ltxmlir@graphics{#1}\ltxmlir@graphicx@orig@includegraphics{#1}}
+\def\includegraphics{\@ifnextchar[{\ltxmlir@graphicx@ig@opt}{\ltxmlir@graphicx@ig@noopt}}
+\def\ltxmlir@graphicx@ig@opt[#1]#2{\ltxmlir@graphics{#2}\ltxmlir@graphicx@orig@includegraphics[#1]{#2}}
+\def\ltxmlir@graphicx@ig@noopt#1{\ltxmlir@graphics{#1}\ltxmlir@graphicx@orig@includegraphics{#1}}
 
 \catcode`\@=12
 \endinput

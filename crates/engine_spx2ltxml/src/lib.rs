@@ -8,13 +8,26 @@
 //! [`tectonic_ltxml_ir::LtxmlBuilder`]. Non-`tsem:` specials and ordinary XDV
 //! drawing events are ignored for now; later phases can attach canvas, font, and
 //! asset data to the generated IR.
+//!
+//! In addition to the JSON-backed `tsem:` protocol, the following raw-text
+//! prefixes are supported to avoid JSON string-escaping issues with
+//! user-supplied content such as titles, TeX math source, or file names:
+//!
+//! - `tsem-text:<content>` — a text event whose content is the raw bytes after
+//!   the prefix (no JSON encoding).
+//! - `tsem-math:<mode>:<tex>` — a self-contained math event; the first
+//!   colon-delimited field is the mode (`inline` or `display`) and everything
+//!   after the second colon is the raw TeX source.
+//! - `tsem-graphics:<filename>` — a self-contained `ltx:graphics` begin/end
+//!   pair whose `graphic` attribute is set to the raw filename.
 
 use std::{
+    collections::BTreeMap,
     fmt,
     io::{Error as IoError, Read},
     str,
 };
-use tectonic_ltxml_ir::{parse_tsem_special, LtxmlBuilder, LtxmlNode, TsemParseError};
+use tectonic_ltxml_ir::{parse_tsem_special, LtxmlBuilder, LtxmlNode, QName, TsemEvent, TsemParseError};
 use tectonic_xdv::{FileType, XdvError, XdvEvents, XdvParser};
 
 /// Errors that can occur while extracting `LtxmlIr` from SPX.
@@ -102,6 +115,46 @@ impl SpxToLtxmlEngine {
 
     /// Consume one raw `\special` payload.
     pub fn handle_special_text(&mut self, contents: &str) -> Result<(), SpxToLtxmlError> {
+        // Raw text event: no JSON escaping required.
+        if let Some(text) = contents.strip_prefix("tsem-text:") {
+            self.builder
+                .apply_event(TsemEvent::Text { text: text.to_string() });
+            return Ok(());
+        }
+
+        // Raw math event: "tsem-math:<mode>:<tex>".  The mode field is always
+        // a safe identifier ("inline" or "display"); only the TeX source can
+        // contain backslashes or quotes.
+        if let Some(payload) = contents.strip_prefix("tsem-math:") {
+            if let Some((mode, tex)) = payload.split_once(':') {
+                let mut attrs = BTreeMap::new();
+                attrs.insert(QName::from("mode"), mode.to_string());
+                attrs.insert(QName::from("tex"), tex.to_string());
+                self.builder.apply_event(TsemEvent::Math {
+                    element: QName::from("ltx:Math"),
+                    attrs,
+                    text: None,
+                });
+            }
+            return Ok(());
+        }
+
+        // Raw graphics event: "tsem-graphics:<filename>".  Creates a
+        // self-closing ltx:graphics element with the graphic attribute set.
+        if let Some(filename) = contents.strip_prefix("tsem-graphics:") {
+            let mut attrs = BTreeMap::new();
+            attrs.insert(QName::from("graphic"), filename.to_string());
+            self.builder.apply_event(TsemEvent::Begin {
+                element: QName::from("ltx:graphics"),
+                attrs,
+            });
+            self.builder.apply_event(TsemEvent::End {
+                element: Some(QName::from("ltx:graphics")),
+            });
+            return Ok(());
+        }
+
+        // JSON-backed tsem: event.
         if contents.strip_prefix("tsem:").is_none() {
             return Ok(());
         }
@@ -192,5 +245,48 @@ mod tests {
         let mut engine = SpxToLtxmlEngine::new();
         let err = engine.handle_header(FileType::Xdv, b"").unwrap_err();
         assert!(matches!(err, SpxToLtxmlError::WrongFileType(FileType::Xdv)));
+    }
+
+    #[test]
+    fn raw_text_special_avoids_json_escaping() {
+        let mut engine = SpxToLtxmlEngine::new();
+        engine
+            .handle_special_text(r#"tsem-text:My "quoted" title"#)
+            .unwrap();
+        let doc = engine.finish();
+        let LtxmlChild::Text { text } = &doc.children[0] else {
+            panic!("expected text child");
+        };
+        assert_eq!(text, r#"My "quoted" title"#);
+    }
+
+    #[test]
+    fn raw_math_special_captures_tex_source_with_backslash() {
+        let mut engine = SpxToLtxmlEngine::new();
+        engine
+            .handle_special_text(r"tsem-math:inline:\frac{a}{b}")
+            .unwrap();
+        let doc = engine.finish();
+        let LtxmlChild::Element { node } = &doc.children[0] else {
+            panic!("expected math element");
+        };
+        assert_eq!(node.name, QName::from("ltx:Math"));
+        assert_eq!(node.attr("mode"), Some("inline"));
+        assert_eq!(node.attr("tex"), Some(r"\frac{a}{b}"));
+    }
+
+    #[test]
+    fn raw_graphics_special_creates_graphics_element() {
+        let mut engine = SpxToLtxmlEngine::new();
+        engine
+            .handle_special_text("tsem-graphics:plot.png")
+            .unwrap();
+        let doc = engine.finish();
+        let LtxmlChild::Element { node } = &doc.children[0] else {
+            panic!("expected graphics element");
+        };
+        assert_eq!(node.name, QName::from("ltx:graphics"));
+        assert_eq!(node.attr("graphic"), Some("plot.png"));
+        assert!(node.children.is_empty());
     }
 }
