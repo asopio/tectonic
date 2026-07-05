@@ -1,0 +1,126 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Experimental LaTeXML-shaped semantic HTML support.
+%
+% This file is intentionally small and conservative. It emits JSON-backed
+% tsem: specials whose element names and attributes target LaTeXML's ltx:*
+% vocabulary. The implementation is a Phase 2 bootstrap for simple article-like
+% documents; later package-binding oxidation should replace these simple patches
+% with package-specific support.
+
+\catcode`\@=11
+
+% State flags tracking which sectioning elements are currently open.
+\newif\ifltxmlir@in@section
+\newif\ifltxmlir@in@subsection
+\newif\ifltxmlir@in@paragraph
+
+\def\ltxmlir@begin#1{\special{tsem:{"event":"begin","element":"#1"}}}
+\def\ltxmlir@end#1{\special{tsem:{"event":"end","element":"#1"}}}
+\def\ltxmlir@text#1{\special{tsem-text:#1}}
+\def\ltxmlir@begin@id#1#2{\special{tsem:{"event":"begin","element":"#1","attrs":{"xml:id":"#2"}}}}
+\def\ltxmlir@begin@class#1#2{\special{tsem:{"event":"begin","element":"#1","attrs":{"class":"#2"}}}}
+% \ltxmlir@math{<mode>}{<tex>} — mode must be "inline" or "display" (no colons).
+% The TeX source is detokenized so control sequences are emitted as plain strings.
+\def\ltxmlir@math#1#2{\special{tsem-math:#1:\detokenize{#2}}}
+\def\ltxmlir@graphics#1{\special{tsem-graphics:#1}}
+
+\let\ltxmlir@orig@title\title
+\def\title#1{\gdef\ltxmlir@title{#1}\ltxmlir@orig@title{#1}}
+\let\ltxmlir@title\@empty
+
+\let\ltxmlir@orig@author\author
+\def\author#1{\gdef\ltxmlir@author{#1}\ltxmlir@orig@author{#1}}
+\let\ltxmlir@author\@empty
+
+\let\ltxmlir@orig@maketitle\maketitle
+\def\maketitle{%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{\ltxmlir@title}%
+  \ltxmlir@end{ltx:title}%
+  \ifx\ltxmlir@author\@empty\else
+    \ltxmlir@begin@class{ltx:creator}{ltx_role_author}%
+    \ltxmlir@begin{ltx:personname}%
+    \ltxmlir@text{\ltxmlir@author}%
+    \ltxmlir@end{ltx:personname}%
+    \ltxmlir@end{ltx:creator}%
+  \fi
+  \ltxmlir@orig@maketitle
+}
+
+\let\ltxmlir@orig@section\section
+\def\section#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\ltxmlir@in@paragraphfalse\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\ltxmlir@in@subsectionfalse\fi
+  \ifltxmlir@in@section\ltxmlir@end{ltx:section}\fi
+  \ltxmlir@in@sectiontrue
+  \ltxmlir@begin{ltx:section}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@orig@section{#1}%
+}
+
+\let\ltxmlir@orig@subsection\subsection
+\def\subsection#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\ltxmlir@in@paragraphfalse\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\fi
+  \ltxmlir@in@subsectiontrue
+  \ltxmlir@begin{ltx:subsection}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@orig@subsection{#1}%
+}
+
+\let\ltxmlir@orig@paragraph\paragraph
+\def\paragraph#1{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\fi
+  \ltxmlir@in@paragraphtrue
+  \ltxmlir@begin{ltx:paragraph}%
+  \ltxmlir@begin{ltx:title}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:title}%
+  \ltxmlir@orig@paragraph{#1}%
+}
+
+\let\ltxmlir@orig@enddocument\enddocument
+\def\enddocument{%
+  \ifltxmlir@in@paragraph\ltxmlir@end{ltx:paragraph}\fi
+  \ifltxmlir@in@subsection\ltxmlir@end{ltx:subsection}\fi
+  \ifltxmlir@in@section\ltxmlir@end{ltx:section}\fi
+  \ltxmlir@orig@enddocument
+}
+
+\let\ltxmlir@orig@emph\emph
+\def\emph#1{%
+  \ltxmlir@begin{ltx:emph}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:emph}%
+  \ltxmlir@orig@emph{#1}%
+}
+
+\def\ltxmlir@inline@math#1{\ltxmlir@math{inline}{#1}}
+\def\ltxmlir@display@math#1{\ltxmlir@begin{ltx:equation}\ltxmlir@math{display}{#1}\ltxmlir@end{ltx:equation}}
+
+\let\ltxmlir@orig@includegraphics\includegraphics
+\def\includegraphics{\@ifnextchar[{\ltxmlir@ig@opt}{\ltxmlir@ig@noopt}}
+\def\ltxmlir@ig@opt[#1]#2{\ltxmlir@graphics{#2}\ltxmlir@orig@includegraphics[#1]{#2}}
+\def\ltxmlir@ig@noopt#1{\ltxmlir@graphics{#1}\ltxmlir@orig@includegraphics{#1}}
+
+\let\ltxmlir@orig@caption\caption
+\def\caption#1{%
+  \ltxmlir@begin{ltx:caption}%
+  \ltxmlir@text{#1}%
+  \ltxmlir@end{ltx:caption}%
+  \ltxmlir@orig@caption{#1}%
+}
+
+\let\ltxmlir@orig@tabular\tabular
+\let\ltxmlir@orig@endtabular\endtabular
+\def\tabular#1{\ltxmlir@begin{ltx:tabular}\ltxmlir@orig@tabular{#1}}
+\def\endtabular{\ltxmlir@end{ltx:tabular}\ltxmlir@orig@endtabular}
+
+\catcode`\@=12
+\endinput

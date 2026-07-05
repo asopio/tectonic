@@ -1,0 +1,13 @@
+% Copyright 2025 the Tectonic Project
+% Licensed under the MIT License.
+%
+% Partial oxidation of LaTeXML's amsmath.sty.ltxml binding.
+% Targets: ltx:Math, ltx:equation.
+
+\catcode`\@=11
+
+\def\ltxmlir@inline@math#1{\ltxmlir@math{inline}{#1}}
+\def\ltxmlir@display@math#1{\ltxmlir@begin{ltx:equation}\ltxmlir@math{display}{#1}\ltxmlir@end{ltx:equation}}
+
+\catcode`\@=12
+\endinput

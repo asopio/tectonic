@@ -1,0 +1,21 @@
+# Copyright 2025 the Tectonic Project
+# Licensed under the MIT License.
+
+lints.workspace = true
+
+[package]
+name = "tectonic_ltxml_profiles"
+version = "0.0.0-dev.0"
+authors = ["Peter Williams <peter@newton.cx>"]
+description = "Output profiles for Tectonic's LaTeXML-shaped HTML pipeline."
+homepage = "https://tectonic-typesetting.github.io/"
+documentation = "https://docs.rs/tectonic_ltxml_profiles"
+repository = "https://github.com/tectonic-typesetting/tectonic/"
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+tectonic_ltxml_html = { path = "../ltxml_html", version = "0.0.0-dev.0" }
+
+[package.metadata.internal_dep_versions]
+tectonic_ltxml_html = "thiscommit:2025-01-01:init"

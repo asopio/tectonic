@@ -1,0 +1,51 @@
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"A Simple Article"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:creator","attrs":{"role":"author"}}
+tsem:{"event":"begin","element":"ltx:personname"}
+tsem:{"event":"text","text":"Ada Lovelace"}
+tsem:{"event":"end","element":"ltx:personname"}
+tsem:{"event":"end","element":"ltx:creator"}
+tsem:{"event":"begin","element":"ltx:abstract"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"A short abstract."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"end","element":"ltx:abstract"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S1","labels":"LABEL:sec:intro"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Introduction"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"This is "}
+tsem:{"event":"begin","element":"ltx:emph"}
+tsem:{"event":"text","text":"important"}
+tsem:{"event":"end","element":"ltx:emph"}
+tsem:{"event":"text","text":" and mathematical: "}
+tsem:{"event":"math","attrs":{"mode":"inline","tex":"x^2"}}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"begin","element":"ltx:equation","attrs":{"xml:id":"E1","labels":"LABEL:eq:one"}}
+tsem:{"event":"math","attrs":{"mode":"display","tex":"E=mc^2"}}
+tsem:{"event":"end","element":"ltx:equation"}
+tsem:{"event":"begin","element":"ltx:figure","attrs":{"xml:id":"F1","labels":"LABEL:fig:plot"}}
+tsem:{"event":"begin","element":"ltx:graphics","attrs":{"graphic":"plot.png","imagesrc":"plot.png","description":"A plot"}}
+tsem:{"event":"end","element":"ltx:graphics"}
+tsem:{"event":"begin","element":"ltx:caption"}
+tsem:{"event":"text","text":"A raster plot."}
+tsem:{"event":"end","element":"ltx:caption"}
+tsem:{"event":"end","element":"ltx:figure"}
+tsem:{"event":"begin","element":"ltx:table","attrs":{"xml:id":"T1","labels":"LABEL:tab:values"}}
+tsem:{"event":"begin","element":"ltx:tabular"}
+tsem:{"event":"begin","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"left"}}
+tsem:{"event":"text","text":"A"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"right"}}
+tsem:{"event":"text","text":"1"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"end","element":"ltx:tr"}
+tsem:{"event":"end","element":"ltx:tabular"}
+tsem:{"event":"begin","element":"ltx:caption"}
+tsem:{"event":"text","text":"A small table."}
+tsem:{"event":"end","element":"ltx:caption"}
+tsem:{"event":"end","element":"ltx:table"}
+tsem:{"event":"end","element":"ltx:section"}

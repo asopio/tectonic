@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Phase 7/8 Demo: Graphics, Tables, and Profiles</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+
+<body>
+    <main class="ltx_document">
+        <h1 class="ltx_title">Phase 7/8 Demo: Graphics, Tables, and Profiles</h1>
+        <p class="ltx_creator"><span class="ltx_personname">Tectonic LaTeXML IR Prototype</span></p>
+        <section id="S1" class="ltx_section" data-labels="LABEL:sec:overview">
+            <h2 class="ltx_title">Overview</h2>
+            <p class="ltx_p">This prototype HTML output was compiled with the <em class="ltx_emph">atlas</em> output
+                profile. It exercises graphics normalization, table normalization, references, and MathJax profile
+                settings.</p>
+        </section>
+        <section id="S2" class="ltx_section" data-labels="LABEL:sec:math">
+            <h2 class="ltx_title">Math and references</h2>
+            <p class="ltx_p">Equation <a class="ltx_ref" href="#E1">1</a> is rendered as display math. See Section <a
+                    class="ltx_ref" href="#S1">1</a> for the introduction.</p>
+            <div id="E1" class="ltx_equation" data-labels="LABEL:eq:quad">
+                <script type="math/tex; mode=display" class="ltx_Math ltx_Math_mathjax" data-tex="x^2 + y^2 = z^2"
+                    aria-label="Pythagorean equation">x^2 + y^2 = z^2</script>
+            </div>
+        </section>
+        <section id="S3" class="ltx_section" data-labels="LABEL:sec:graphics">
+            <h2 class="ltx_title">Raster graphics</h2>
+            <p class="ltx_p">Figure <a class="ltx_ref" href="#F1">1</a> includes a raster image selected from graphics
+                candidates.</p>
+            <figure id="F1" class="ltx_figure" data-labels="LABEL:fig:plot"><img class="ltx_graphics"
+                    src="phase7_plot.png" alt="Small raster demo plot" width="120" height="60">
+                <figcaption class="ltx_caption">A small raster image used by the Phase 7 graphics normalization demo.
+                </figcaption>
+            </figure>
+        </section>
+        <section id="S4" class="ltx_section" data-labels="LABEL:sec:tables">
+            <h2 class="ltx_title">Tables</h2>
+            <p class="ltx_p">Table <a class="ltx_ref" href="#T1">1</a> demonstrates row normalization and cell
+                alignment.</p>
+            <figure id="T1" class="ltx_table" data-labels="LABEL:tab:values">
+                <table class="ltx_tabular">
+                    <tbody class="ltx_tbody">
+                        <tr class="ltx_tr">
+                            <th class="ltx_td" style="text-align:left">Quantity</th>
+                            <th class="ltx_td" style="text-align:right">Value</th>
+                        </tr>
+                        <tr class="ltx_tr">
+                            <td class="ltx_td" style="text-align:left">Events</td>
+                            <td class="ltx_td" style="text-align:right">42</td>
+                        </tr>
+                        <tr class="ltx_tr">
+                            <td class="ltx_td" style="text-align:left">Bins</td>
+                            <td class="ltx_td" style="text-align:right">7</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <figcaption class="ltx_caption">A small table for the Phase 7 table normalization demo.</figcaption>
+            </figure>
+        </section>
+    </main>
+
+</body>
+
+</html>

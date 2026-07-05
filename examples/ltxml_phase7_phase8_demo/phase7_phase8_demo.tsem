@@ -1,0 +1,97 @@
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Phase 7/8 Demo: Graphics, Tables, and Profiles"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:creator","attrs":{"role":"author"}}
+tsem:{"event":"begin","element":"ltx:personname"}
+tsem:{"event":"text","text":"Tectonic LaTeXML IR Prototype"}
+tsem:{"event":"end","element":"ltx:personname"}
+tsem:{"event":"end","element":"ltx:creator"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S1","labels":"LABEL:sec:overview","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Overview"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"This prototype HTML output was compiled with the "}
+tsem:{"event":"begin","element":"ltx:emph"}
+tsem:{"event":"text","text":"atlas"}
+tsem:{"event":"end","element":"ltx:emph"}
+tsem:{"event":"text","text":" output profile. It exercises graphics normalization, table normalization, references, and MathJax profile settings."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"end","element":"ltx:section"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S2","labels":"LABEL:sec:math","refnum":"2"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Math and references"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"Equation "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"eq:quad"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":" is rendered as display math. See Section "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"sec:overview"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":" for the introduction."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"begin","element":"ltx:equation","attrs":{"xml:id":"E1","labels":"LABEL:eq:quad","refnum":"1"}}
+tsem:{"event":"math","attrs":{"mode":"display","tex":"x^2 + y^2 = z^2","description":"Pythagorean equation"}}
+tsem:{"event":"end","element":"ltx:equation"}
+tsem:{"event":"end","element":"ltx:section"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S3","labels":"LABEL:sec:graphics","refnum":"3"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Raster graphics"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"Figure "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"fig:plot"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":" includes a raster image selected from graphics candidates."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"begin","element":"ltx:figure","attrs":{"xml:id":"F1","labels":"LABEL:fig:plot","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:graphics","attrs":{"graphic":"phase7_plot","candidates":"phase7_plot.pdf,phase7_plot.png","description":"Small raster demo plot","imagewidth":"120","imageheight":"60"}}
+tsem:{"event":"end","element":"ltx:graphics"}
+tsem:{"event":"begin","element":"ltx:caption"}
+tsem:{"event":"text","text":"A small raster image used by the Phase 7 graphics normalization demo."}
+tsem:{"event":"end","element":"ltx:caption"}
+tsem:{"event":"end","element":"ltx:figure"}
+tsem:{"event":"end","element":"ltx:section"}
+tsem:{"event":"begin","element":"ltx:section","attrs":{"xml:id":"S4","labels":"LABEL:sec:tables","refnum":"4"}}
+tsem:{"event":"begin","element":"ltx:title"}
+tsem:{"event":"text","text":"Tables"}
+tsem:{"event":"end","element":"ltx:title"}
+tsem:{"event":"begin","element":"ltx:p"}
+tsem:{"event":"text","text":"Table "}
+tsem:{"event":"begin","element":"ltx:ref","attrs":{"labelref":"tab:values"}}
+tsem:{"event":"end","element":"ltx:ref"}
+tsem:{"event":"text","text":" demonstrates row normalization and cell alignment."}
+tsem:{"event":"end","element":"ltx:p"}
+tsem:{"event":"begin","element":"ltx:table","attrs":{"xml:id":"T1","labels":"LABEL:tab:values","refnum":"1"}}
+tsem:{"event":"begin","element":"ltx:tabular"}
+tsem:{"event":"begin","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"thead":"column","align":"left"}}
+tsem:{"event":"text","text":"Quantity"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"thead":"column","align":"right"}}
+tsem:{"event":"text","text":"Value"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"end","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"left"}}
+tsem:{"event":"text","text":"Events"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"right"}}
+tsem:{"event":"text","text":"42"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"end","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:tr"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"left"}}
+tsem:{"event":"text","text":"Bins"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"begin","element":"ltx:td","attrs":{"align":"right"}}
+tsem:{"event":"text","text":"7"}
+tsem:{"event":"end","element":"ltx:td"}
+tsem:{"event":"end","element":"ltx:tr"}
+tsem:{"event":"end","element":"ltx:tabular"}
+tsem:{"event":"begin","element":"ltx:caption"}
+tsem:{"event":"text","text":"A small table for the Phase 7 table normalization demo."}
+tsem:{"event":"end","element":"ltx:caption"}
+tsem:{"event":"end","element":"ltx:table"}
+tsem:{"event":"end","element":"ltx:section"}

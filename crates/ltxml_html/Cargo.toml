@@ -1,0 +1,25 @@
+# Copyright 2025 the Tectonic Project
+# Licensed under the MIT License.
+
+lints.workspace = true
+
+[package]
+name = "tectonic_ltxml_html"
+version = "0.0.0-dev.0"
+authors = ["Peter Williams <peter@newton.cx>"]
+description = "Minimal HTML renderer for Tectonic's LaTeXML-shaped IR."
+homepage = "https://tectonic-typesetting.github.io/"
+documentation = "https://docs.rs/tectonic_ltxml_html"
+repository = "https://github.com/tectonic-typesetting/tectonic/"
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+tectonic_ltxml_ir = { path = "../ltxml_ir", version = "0.0.0-dev.0" }
+
+[dev-dependencies]
+tectonic_engine_spx2ltxml = { path = "../engine_spx2ltxml", version = "0.0.0-dev.0" }
+
+[package.metadata.internal_dep_versions]
+tectonic_ltxml_ir = "thiscommit:2025-01-01:init"
+tectonic_engine_spx2ltxml = "thiscommit:2025-01-01:init"
